@@ -1,0 +1,138 @@
+.section {
+  padding: var(--space-9) clamp(1rem, 4vw, 2rem);
+  background: var(--color-bg);
+}
+
+.inner {
+  max-width: var(--max-w);
+  margin-inline: auto;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
+}
+
+.head > header {
+  margin-bottom: 0;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  transition: transform 0.6s var(--ease-out), border-color 0.6s;
+}
+
+.card:hover {
+  border-color: rgba(184, 149, 108, 0.6);
+}
+
+.featured {
+  background: linear-gradient(170deg, #2c241c, #1d1915);
+  border-color: rgba(184, 149, 108, 0.55);
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s var(--ease-out);
+}
+
+.card:hover .media img {
+  transform: scale(1.08);
+}
+
+.badge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: var(--color-brass-bright);
+  border-radius: var(--radius-sm);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5);
+}
+
+.name {
+  font-size: var(--text-xl);
+}
+
+.note {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-stone);
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.6rem + 2vw, 3rem);
+  line-height: 1;
+  color: var(--color-brass-bright);
+}
+
+.features {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.features li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: var(--text-sm);
+  color: var(--color-stone);
+}
+
+.features li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.7rem;
+  height: 0.4rem;
+  border-left: 1.5px solid var(--color-brass);
+  border-bottom: 1.5px solid var(--color-brass);
+  transform: rotate(-45deg);
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .featured {
+    margin-top: calc(var(--space-6) * -1);
+  }
+}

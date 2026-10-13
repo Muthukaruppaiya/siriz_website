@@ -1,0 +1,143 @@
+.section {
+  padding: var(--space-9) clamp(1rem, 4vw, 2rem);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.inner {
+  max-width: calc(var(--max-w) + 4rem);
+  margin-inline: auto;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.card {
+  min-width: 0;
+}
+
+.link {
+  display: block;
+}
+
+.media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+}
+
+.media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 1.2s var(--ease-out);
+}
+
+.media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(20, 17, 14, 0.45));
+  opacity: 0;
+  transition: opacity 0.6s var(--ease-out);
+}
+
+.link:hover .media img {
+  transform: scale(1.1);
+}
+
+.link:hover .media::after {
+  opacity: 1;
+}
+
+.meta {
+  display: grid;
+  gap: var(--space-2);
+  padding-top: var(--space-4);
+}
+
+.index {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--color-wood);
+}
+
+.title {
+  font-size: var(--text-xl);
+}
+
+.body {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  line-height: 1.6;
+}
+
+.cta {
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-wood);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.5s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.link:hover .cta {
+  opacity: 1;
+  transform: none;
+}
+
+.grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (max-width: 559px) {
+  .grid {
+    gap: var(--space-5) var(--space-3);
+  }
+
+  .media {
+    aspect-ratio: 1;
+  }
+
+  .meta {
+    gap: 0.15rem;
+    padding-top: var(--space-3);
+  }
+
+  .title {
+    font-size: 1.15rem;
+  }
+
+  .body,
+  .cta {
+    display: none;
+  }
+}
+
+@media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-7) var(--space-5);
+  }
+
+  .card:nth-child(4n + 2),
+  .card:nth-child(4n + 4) {
+    margin-top: var(--space-8);
+  }
+}
+
+@media (hover: none) {
+  .cta {
+    opacity: 1;
+    transform: none;
+  }
+}

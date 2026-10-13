@@ -1,0 +1,120 @@
+.footer {
+  position: relative;
+  overflow: hidden;
+  background: #110f0d;
+  border-top: 1px solid rgba(184, 149, 108, 0.16);
+  padding: var(--space-9) clamp(1rem, 4vw, 2.5rem) var(--space-5);
+}
+
+.top {
+  max-width: calc(var(--max-w) + 4rem);
+  margin-inline: auto;
+  display: grid;
+  gap: var(--space-8);
+}
+
+.kicker {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+  margin-bottom: var(--space-4);
+}
+
+.bigLink {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 1.4rem + 4vw, 4.75rem);
+  line-height: 1.05;
+  color: var(--color-cream);
+  background: linear-gradient(var(--color-brass), var(--color-brass)) left bottom / 0 1px no-repeat;
+  transition:
+    background-size 0.8s var(--ease-out),
+    color 0.4s;
+}
+
+.bigLink:hover {
+  background-size: 100% 1px;
+  color: var(--color-brass-bright);
+}
+
+.arrow {
+  display: inline-block;
+  transition: transform 0.6s var(--ease-out);
+}
+
+.bigLink:hover .arrow {
+  transform: translateX(0.25em);
+}
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-brass);
+  margin-bottom: var(--space-4);
+}
+
+.list {
+  display: grid;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.list a {
+  color: var(--color-stone);
+  transition: color 0.3s;
+}
+
+.list a:hover {
+  color: var(--color-cream);
+}
+
+.address {
+  color: var(--color-stone);
+  line-height: 1.75;
+  font-size: var(--text-sm);
+}
+
+.wordmark {
+  margin: var(--space-8) 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(7rem, 28vw, 26rem);
+  font-weight: 600;
+  line-height: 0.75;
+  letter-spacing: -0.04em;
+  text-align: center;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(184, 149, 108, 0.22);
+  user-select: none;
+}
+
+.bottom {
+  max-width: calc(var(--max-w) + 4rem);
+  margin: var(--space-6) auto 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(196, 184, 168, 0.1);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  color: rgba(196, 184, 168, 0.7);
+}
+
+@media (min-width: 900px) {
+  .cols {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
