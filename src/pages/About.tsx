@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { useState } from 'react'
 import {
   aboutStory,
@@ -30,7 +31,7 @@ export function About() {
         eyebrow={`${contact.yearsExperience} years · Medavakkam, Chennai`}
         title="We design your dream home."
         body="One Chennai team for design, production, and installation."
-        image="/images/hero/hero-1.webp"
+        image={asset('/images/hero/hero-1.webp')}
       />
 
       <section className={`${styles.section} ${styles.dark}`}>
@@ -52,7 +53,7 @@ export function About() {
       <section className={`${styles.section} ${styles.light}`}>
         <div className={`${styles.wrap} ${styles.office}`}>
           <figure className={styles.officeMedia} data-reveal-clip>
-            <img src="/images/about/about.webp" alt="Siriz Interiors studio interior" loading="lazy" />
+            <img src={asset('/images/about/about.webp')} alt="Siriz Interiors studio interior" loading="lazy" />
           </figure>
           <div className={styles.officeMeta}>
             <SectionHeading tone="dark" eyebrow="Chennai office" title="Visit the studio." />

@@ -1,3 +1,4 @@
+import { asset } from '../../lib/asset'
 import { Link } from 'react-router-dom'
 import { aboutStory, individuality, stats } from '../../data/company'
 import { Counter } from '../motion/Counter'
@@ -16,7 +17,7 @@ export function StoryIntro() {
         <div className={styles.grid}>
           <figure className={styles.figure} data-reveal-clip>
             <img
-              src="/images/about/about.webp"
+              src={asset('/images/about/about.webp')}
               alt="The Siriz Interiors studio"
               loading="lazy"
               className={styles.image}

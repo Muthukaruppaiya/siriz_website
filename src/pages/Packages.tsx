@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { packageFaqs, packages } from '../data/packages'
 import { whatsappUrl } from '../data/contact'
 import { FinalCTA } from '../components/home/FinalCTA'
@@ -24,7 +25,7 @@ export function Packages() {
         eyebrow="Pricing plan"
         title="Packages with justified prices."
         body="Kitchens from ₹69,000, wardrobes from ₹1,00,000, full homes from ₹3,25,000."
-        image="/images/moodboard/mood-07.webp"
+        image={asset('/images/moodboard/mood-07.webp')}
       />
 
       <section className={`${styles.section} ${styles.light}`}>

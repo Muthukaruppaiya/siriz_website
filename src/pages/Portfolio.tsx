@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
@@ -46,7 +47,7 @@ export function Portfolio() {
         eyebrow="Our work"
         title="Homes we have designed and delivered."
         body="Projects, Siriz Signature, mood boards, and build films."
-        image="/images/signature/signature-02.webp"
+        image={asset('/images/signature/signature-02.webp')}
       />
 
       <div className={styles.tabsBar}>

@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { tours } from '../data/tours'
@@ -26,7 +27,7 @@ export function Tours() {
         eyebrow="Siriz Interiors 360° VTour"
         title="Step inside finished homes."
         body="Real Siriz handovers in 360°. Drag to look around."
-        image="/images/tours/tour-1.webp"
+        image={asset('/images/tours/tour-1.webp')}
       />
 
       <section className={`${styles.section} ${styles.dark}`}>

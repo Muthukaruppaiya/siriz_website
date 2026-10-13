@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 export const aboutStory = [
   'With 11 years of experience, Siriz Interiors consistently exceeds expectations, bringing a unique touch to every home we design.',
   'Our design services meet international standards, turning a blank space into one that reflects your style.',
@@ -73,64 +74,64 @@ export const spaces = [
     id: 'kitchen',
     title: 'Modular kitchens',
     body: 'Sleek, efficient, made for modern living.',
-    image: '/images/moodboard/mood-05.webp',
+    image: asset('/images/moodboard/mood-05.webp'),
   },
   {
     id: 'living',
     title: 'Living rooms',
     body: 'Welcoming spaces for family and guests.',
-    image: '/images/moodboard/mood-02.webp',
+    image: asset('/images/moodboard/mood-02.webp'),
   },
   {
     id: 'bedroom',
     title: 'Bedrooms',
     body: 'Serene retreats for true relaxation.',
-    image: '/images/moodboard/mood-11.webp',
+    image: asset('/images/moodboard/mood-11.webp'),
   },
   {
     id: 'dining',
     title: 'Dining rooms',
     body: 'Elegant spaces that elevate every meal.',
-    image: '/images/hero/hero-2.webp',
+    image: asset('/images/hero/hero-2.webp'),
   },
   {
     id: 'kids',
     title: 'Kids’ rooms',
     body: 'Playful, safe spaces to grow in.',
-    image: '/images/gallery/interior-10.webp',
+    image: asset('/images/gallery/interior-10.webp'),
   },
   {
     id: 'study',
     title: 'Study rooms',
     body: 'Clutter-free corners for focus.',
-    image: '/images/projects/p3-01.webp',
+    image: asset('/images/projects/p3-01.webp'),
   },
   {
     id: 'pooja',
     title: 'Pooja units',
     body: 'Carved and lit for daily rituals.',
-    image: '/images/moodboard/mood-10.webp',
+    image: asset('/images/moodboard/mood-10.webp'),
   },
   {
     id: 'balcony',
     title: 'Balconies',
     body: 'Cozy corners for leisure.',
-    image: '/frames/balcony/0120.webp',
+    image: asset('/frames/balcony/0120.webp'),
   },
 ]
 
 export const certificates = [
-  { id: 'c1', image: '/images/certificates/certificate-1.webp', caption: 'Award ceremony' },
-  { id: 'c2', image: '/images/certificates/certificate-2.webp', caption: 'Certificate of recognition' },
-  { id: 'c4', image: '/images/certificates/certificate-4.webp', caption: 'Excellence trophy' },
-  { id: 'c5', image: '/images/certificates/certificate-5.webp', caption: 'Certificate of recognition' },
+  { id: 'c1', image: asset('/images/certificates/certificate-1.webp'), caption: 'Award ceremony' },
+  { id: 'c2', image: asset('/images/certificates/certificate-2.webp'), caption: 'Certificate of recognition' },
+  { id: 'c4', image: asset('/images/certificates/certificate-4.webp'), caption: 'Excellence trophy' },
+  { id: 'c5', image: asset('/images/certificates/certificate-5.webp'), caption: 'Certificate of recognition' },
 ]
 
 export const materialPartners = [
   'b-01', 'b-02', 'b-03', 'b-04', 'b-05', 'b-06', 'b-07',
   'b-08', 'b-09', 'b-10', 'b-11', 'b-12', 'b-13',
-].map((id) => `/images/clients/${id}.webp`)
+].map((id) => asset(`/images/clients/${id}.webp`))
 
 export const builderClients = ['new-1', 'new-2', 'new-3', 'new-4', 'new-5', 'new-6'].map(
-  (id) => `/images/clients/${id}.webp`,
+  (id) => asset(`/images/clients/${id}.webp`),
 )

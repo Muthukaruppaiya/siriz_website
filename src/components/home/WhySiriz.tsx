@@ -1,3 +1,4 @@
+import { asset } from '../../lib/asset'
 import { whySiriz } from '../../data/company'
 import { SectionHeading } from '../shared/SectionHeading'
 import styles from './WhySiriz.module.css'
@@ -6,7 +7,7 @@ export function WhySiriz() {
   return (
     <section className={styles.section}>
       <div className={styles.bg} aria-hidden="true">
-        <img src="/images/projects/p1-03.webp" alt="" data-parallax="10" />
+        <img src={asset('/images/projects/p1-03.webp')} alt="" data-parallax="10" />
       </div>
       <div className={styles.inner}>
         <div className={styles.sticky}>

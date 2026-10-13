@@ -1,3 +1,4 @@
+import { asset } from '../../lib/asset'
 import { contact } from '../../data/contact'
 import { ConsultForm } from '../shared/ConsultForm'
 import { SectionHeading } from '../shared/SectionHeading'
@@ -7,7 +8,7 @@ export function FinalCTA() {
   return (
     <section className={styles.section} id="consult">
       <div className={styles.bg} aria-hidden="true">
-        <img src="/images/signature/signature-03.webp" alt="" data-parallax="10" />
+        <img src={asset('/images/signature/signature-03.webp')} alt="" data-parallax="10" />
       </div>
       <div className={styles.inner}>
         <div className={styles.copy}>

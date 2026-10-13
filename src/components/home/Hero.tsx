@@ -1,3 +1,4 @@
+import { asset } from '../../lib/asset'
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -50,8 +51,8 @@ export function Hero() {
       <div className={styles.media} ref={mediaRef} aria-hidden="true">
         <video
           className={styles.video}
-          src="/video/living-hall.mp4"
-          poster="/frames/living/0120.webp"
+          src={asset('/video/living-hall.mp4')}
+          poster={asset('/frames/living/0120.webp')}
           autoPlay
           muted
           loop

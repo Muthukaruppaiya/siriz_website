@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 export type PackageItem = {
   id: string
   name: string
@@ -23,7 +24,7 @@ export const packages: PackageItem[] = [
       'Kitchen accessories',
       'Décor',
     ],
-    image: '/images/moodboard/mood-06.webp',
+    image: asset('/images/moodboard/mood-06.webp'),
   },
   {
     id: 'wardrobe',
@@ -38,7 +39,7 @@ export const packages: PackageItem[] = [
       '3 types of wardrobe doors',
       'Décor',
     ],
-    image: '/images/gallery/interior-10.webp',
+    image: asset('/images/gallery/interior-10.webp'),
   },
   {
     id: 'full-home',
@@ -48,7 +49,7 @@ export const packages: PackageItem[] = [
     description:
       'Kitchen, living, bedroom, and décor as one turnkey plan.',
     features: ['Modular kitchen', 'Living room', 'Bedroom', 'Décor'],
-    image: '/images/hero/hero-1.webp',
+    image: asset('/images/hero/hero-1.webp'),
     featured: true,
   },
 ]

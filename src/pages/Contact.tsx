@@ -1,3 +1,4 @@
+import { asset } from '../lib/asset'
 import { contact, whatsappUrl } from '../data/contact'
 import { ConsultForm } from '../components/shared/ConsultForm'
 import { PageHero } from '../components/shared/PageHero'
@@ -12,7 +13,7 @@ export function Contact() {
         eyebrow="Get in touch"
         title="Let’s plan your home."
         body="WhatsApp is the fastest way to reach a designer."
-        image="/images/projects/p5-01.webp"
+        image={asset('/images/projects/p5-01.webp')}
       />
 
       <section className={`${styles.section} ${styles.dark}`}>
