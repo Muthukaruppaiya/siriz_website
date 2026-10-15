@@ -19,10 +19,10 @@ export function PackagesTeaser() {
           </Button>
         </div>
 
-        <ul className={`${styles.grid} swipe-mobile`} data-reveal-stagger>
+        <ul className={`${styles.grid} swipe-mobile`} data-reveal-stagger data-lenis-prevent="">
           {packages.map((pkg) => (
             <li key={pkg.id} className={`${styles.card} ${pkg.featured ? styles.featured : ''}`}>
-              <div className={styles.media}>
+              <div className={styles.media} data-skew>
                 <img src={pkg.image} alt="" loading="lazy" />
                 {pkg.featured ? <span className={styles.badge}>Most chosen</span> : null}
               </div>

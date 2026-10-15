@@ -188,10 +188,11 @@ function ScrubStage() {
     const sequence = new FrameSequence(roomJourney, requestDraw)
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.35)
       canvas.width = Math.round(canvas.clientWidth * dpr)
       canvas.height = Math.round(canvas.clientHeight * dpr)
-      ctx.imageSmoothingQuality = 'high'
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'medium'
       requestDraw()
     }
     resize()
@@ -207,9 +208,10 @@ function ScrubStage() {
           start: 'top top',
           end: () => `+=${window.innerHeight * count * SCROLL_PER_ROOM}`,
           pin: true,
-          scrub: 1.4,
+          scrub: 0.55,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          refreshPriority: 2,
         },
         onUpdate: () => {
           progressRef.current = proxy.p
@@ -218,12 +220,12 @@ function ScrubStage() {
       })
       triggerRef.current = tween.scrollTrigger ?? null
     }, stage)
+    ScrollTrigger.sort()
     ScrollTrigger.refresh()
 
-    const startTimer = window.setTimeout(() => sequence.start(), 250)
+    sequence.start()
 
     return () => {
-      window.clearTimeout(startTimer)
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(rafId)
       sequence.destroy()

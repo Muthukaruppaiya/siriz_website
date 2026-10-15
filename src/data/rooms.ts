@@ -18,9 +18,9 @@ export function frameUrl(room: RoomJourneyItem, index: number): string {
 
 export const buildStages = [
   { at: 0, label: 'Bare shell' },
-  { at: 0.28, label: 'Design & planning' },
-  { at: 0.58, label: 'Installation' },
-  { at: 0.88, label: 'Handover' },
+  { at: 0.1, label: 'Design & planning' },
+  { at: 0.45, label: 'Installation' },
+  { at: 0.85, label: 'Handover' },
 ] as const
 
 export const roomJourney: RoomJourneyItem[] = [

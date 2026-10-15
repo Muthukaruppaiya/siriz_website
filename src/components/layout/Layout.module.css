@@ -6,7 +6,7 @@
 
 .main {
   flex: 1;
-  animation: pageIn 0.9s var(--ease-out) both;
+  animation: pageIn 0.45s var(--ease-out);
 }
 
 @keyframes pageIn {

@@ -19,6 +19,7 @@ const slides = [
 export function Hero() {
   const rootRef = useRef<HTMLElement>(null)
   const mediaRef = useRef<HTMLDivElement>(null)
+  const dimRef = useRef<HTMLDivElement>(null)
   const [slide, setSlide] = useState(0)
   const reducedMotion = usePrefersReducedMotion()
 
@@ -31,17 +32,28 @@ export function Hero() {
     if (reducedMotion || !rootRef.current || !mediaRef.current) return
     const ctx = gsap.context(() => {
       gsap.to(mediaRef.current, {
-        scale: 1.18,
-        yPercent: 12,
-        filter: 'brightness(0.45)',
+        scale: 1.08,
+        yPercent: 6,
         ease: 'none',
         scrollTrigger: {
           trigger: rootRef.current,
           start: 'top top',
           end: 'bottom top',
-          scrub: true,
+          scrub: 0.6,
         },
       })
+      if (dimRef.current) {
+        gsap.to(dimRef.current, {
+          opacity: 0.5,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: rootRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6,
+          },
+        })
+      }
     }, rootRef)
     return () => ctx.revert()
   }, [reducedMotion])
@@ -52,13 +64,14 @@ export function Hero() {
         <video
           className={styles.video}
           src={asset('/video/living-hall.mp4')}
-          poster={asset('/frames/living/0120.webp')}
+          poster={asset('/frames/living/0001.webp')}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
         />
+        <div className={styles.dim} ref={dimRef} />
       </div>
       <div className={styles.veil} aria-hidden="true" />
 

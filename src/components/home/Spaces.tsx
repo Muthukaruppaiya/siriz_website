@@ -5,7 +5,7 @@ import styles from './Spaces.module.css'
 
 export function Spaces() {
   return (
-    <section className={styles.section}>
+    <section className={styles.section} data-curtain>
       <div className={styles.inner}>
         <div className={styles.head}>
           <SectionHeading
@@ -24,8 +24,9 @@ export function Spaces() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.link}
+                data-speed={i % 2 ? 70 : 20}
               >
-                <div className={styles.media}>
+                <div className={styles.media} data-skew>
                   <img src={space.image} alt="" loading="lazy" />
                 </div>
                 <div className={styles.meta}>

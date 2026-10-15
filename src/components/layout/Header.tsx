@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { contact, whatsappUrl } from '../../data/contact'
 import { lockScroll } from '../../hooks/useLenis'
@@ -22,39 +22,52 @@ export function Header() {
       const value = typeof next === 'function' ? next(prev === pathname) : next
       return value ? pathname : null
     })
-  const [scrolled, setScrolled] = useState(false)
-  const [hidden, setHidden] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
   const progressRef = useRef<HTMLSpanElement>(null)
+  const openRef = useRef(open)
 
-  useEffect(() => {
-    let lastY = window.scrollY
-    let ticking = false
+  useLayoutEffect(() => {
+    const header = headerRef.current
+    const bar = progressRef.current
+    if (!header) return
+
+    let anchorY = window.scrollY
+    let anchorAt = performance.now()
+    let frame = 0
 
     const update = () => {
-      ticking = false
+      frame = 0
       const y = window.scrollY
-      setScrolled(y > 24)
-      setHidden(y > 480 && y > lastY + 2)
-      if (y < lastY - 2) setHidden(false)
-      lastY = y
+      const now = performance.now()
+      header.classList.toggle(styles.scrolled, y > 24)
+      if (now - anchorAt > 90) {
+        const delta = y - anchorY
+        if (!openRef.current && y > 520 && delta > 16) header.classList.add(styles.hidden)
+        if (openRef.current || delta < -16 || y < 140) header.classList.remove(styles.hidden)
+        anchorY = y
+        anchorAt = now
+      }
 
       const max = document.documentElement.scrollHeight - window.innerHeight
-      if (progressRef.current) {
-        progressRef.current.style.transform = `scaleX(${max > 0 ? y / max : 0})`
-      }
+      if (bar) bar.style.transform = `scaleX(${max > 0 ? Math.min(1, y / max) : 0})`
     }
 
     const onScroll = () => {
-      if (!ticking) {
-        ticking = true
-        requestAnimationFrame(update)
-      }
+      if (!frame) frame = requestAnimationFrame(update)
     }
 
     update()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (frame) cancelAnimationFrame(frame)
+    }
   }, [])
+
+  useLayoutEffect(() => {
+    openRef.current = open
+    if (open) headerRef.current?.classList.remove(styles.hidden)
+  }, [open])
 
   useEffect(() => {
     lockScroll(open)
@@ -62,9 +75,7 @@ export function Header() {
   }, [open])
 
   return (
-    <header
-      className={`${styles.header} ${scrolled ? styles.scrolled : ''} ${hidden && !open ? styles.hidden : ''}`}
-    >
+    <header ref={headerRef} className={styles.header}>
       <div className={styles.inner}>
         <Link to="/" className={styles.brand} aria-label="Siriz Interiors home">
           <span className={styles.brandMark}>Siriz</span>

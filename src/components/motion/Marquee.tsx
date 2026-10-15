@@ -20,7 +20,7 @@ export function Marquee({ children, duration = 40, gap = '1rem', reverse, classN
       className={`${styles.marquee} ${reverse ? styles.marqueeReverse : ''} ${className}`}
       style={style}
     >
-      <div className={styles.marqueeTrack}>
+      <div className={styles.marqueeTrack} data-marquee>
         <div className={styles.marqueeGroup}>{children}</div>
         <div className={styles.marqueeGroup} aria-hidden="true">
           {children}

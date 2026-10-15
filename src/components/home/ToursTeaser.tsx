@@ -12,11 +12,11 @@ export function ToursTeaser() {
           title="Walk through finished homes from anywhere."
           body="Step inside real Siriz handovers in full 360°."
         />
-        <ul className={`${styles.grid} swipe-mobile`} data-reveal-stagger>
+        <ul className={`${styles.grid} swipe-mobile`} data-reveal-stagger data-lenis-prevent="">
           {tours.map((tour) => (
             <li key={tour.id}>
               <Link to={`/tours?site=${tour.id}`} className={styles.card}>
-                <div className={styles.media}>
+                <div className={styles.media} data-skew>
                   <img src={tour.image} alt={`${tour.name} 360 tour preview`} loading="lazy" />
                   <span className={styles.badge} aria-hidden="true">
                     360°

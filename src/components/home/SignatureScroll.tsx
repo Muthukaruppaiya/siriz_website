@@ -35,9 +35,10 @@ export function SignatureScroll() {
           start: 'top top',
           end: () => `+=${distance()}`,
           pin: true,
-          scrub: 1.2,
+          scrub: 0.65,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          refreshPriority: 1,
           onUpdate: (self) => {
             if (barRef.current) barRef.current.style.transform = `scaleX(${self.progress})`
           },
@@ -63,6 +64,7 @@ export function SignatureScroll() {
       })
     }, section)
 
+    ScrollTrigger.sort()
     ScrollTrigger.refresh()
     return () => ctx.revert()
   }, [pinned])
@@ -80,7 +82,7 @@ export function SignatureScroll() {
         </p>
       </div>
 
-      <ul className={styles.track} ref={trackRef}>
+      <ul className={styles.track} ref={trackRef} {...(pinned ? {} : { 'data-lenis-prevent': '' })}>
         {signature.map((img, i) => (
           <li key={img.src} className={`${styles.item} ${i % 3 === 1 ? styles.tall : ''}`}>
             <button

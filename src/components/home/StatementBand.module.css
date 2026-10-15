@@ -1,0 +1,53 @@
+.band {
+  display: grid;
+  gap: clamp(0.25rem, 1vw, 0.75rem);
+  padding: var(--space-8) 0;
+  overflow: hidden;
+  background: var(--color-bg);
+  border-block: 1px solid rgba(184, 149, 108, 0.12);
+}
+
+.row {
+  overflow: hidden;
+}
+
+.line {
+  display: flex;
+  width: max-content;
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1.5rem + 7vw, 9rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  white-space: nowrap;
+  color: var(--color-cream);
+  will-change: transform;
+}
+
+.outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(212, 184, 150, 0.6);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mark {
+  display: inline-block;
+  width: 0.18em;
+  height: 0.18em;
+  margin-inline: 0.45em;
+  border-radius: 50%;
+  background: var(--color-brass);
+}
+
+.outline .mark {
+  background: transparent;
+  border: 1px solid var(--color-brass);
+}
+
+.line:not(.outline) {
+  margin-left: -8vw;
+}

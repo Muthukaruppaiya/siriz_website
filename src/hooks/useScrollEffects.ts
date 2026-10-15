@@ -15,6 +15,12 @@ gsap.registerPlugin(ScrollTrigger)
  *   data-parallax="12"     drifts by ±N% while its parent crosses the viewport
  *   data-fade-out          fades and lifts away as it scrolls off the top
  *   data-draw              scaleY 0 → 1 while its parent scrolls (timeline lines)
+ *   data-curtain           section opens from an inset rounded card to full bleed as it enters
+ *   data-skew              leans with scroll velocity, settles when scrolling stops
+ *   data-speed="60"        drifts ±N px against the scroll (desktop only)
+ *   data-focus             brightens and settles as it reaches the middle of the viewport
+ *   data-scroll-x="-25"    slides horizontally by N% while its parent crosses the viewport
+ *   data-marquee           CSS marquee speeds up with scroll and reverses when scrolling up
  */
 export function useScrollEffects(key: string): void {
   const reducedMotion = usePrefersReducedMotion()
@@ -94,7 +100,7 @@ export function useScrollEffects(key: string): void {
 
       gsap.utils.toArray<HTMLElement>('[data-split]').forEach((el) => {
         const words = el.querySelectorAll('[data-word]')
-        gsap.set(words, { yPercent: 110 })
+        gsap.set(words, { yPercent: 120, rotate: 8, transformOrigin: '0% 100%' })
         ScrollTrigger.create({
           trigger: el,
           start: 'top 90%',
@@ -102,12 +108,126 @@ export function useScrollEffects(key: string): void {
           onEnter: () =>
             gsap.to(words, {
               yPercent: 0,
-              duration: 1.2,
+              rotate: 0,
+              duration: 1.3,
               ease: 'expo.out',
-              stagger: 0.035,
+              stagger: 0.045,
             }),
         })
       })
+
+      gsap.utils.toArray<HTMLElement>('[data-curtain]').forEach((el) => {
+        gsap.fromTo(
+          el,
+          {
+            clipPath: compact
+              ? 'inset(2.5% 3% 0% 3% round 18px)'
+              : 'inset(7% 6% 0% 6% round 36px)',
+          },
+          {
+            clipPath: 'inset(0% 0% 0% 0% round 0px)',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top bottom',
+              end: 'top 20%',
+              scrub: 0.6,
+            },
+          },
+        )
+      })
+
+      gsap.utils.toArray<HTMLElement>('[data-focus]').forEach((el) => {
+        gsap.fromTo(
+          el,
+          { opacity: 0.18, x: compact ? 0 : 48 },
+          {
+            opacity: 1,
+            x: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el,
+              start: 'top 92%',
+              end: 'top 58%',
+              scrub: 0.5,
+            },
+          },
+        )
+      })
+
+      gsap.utils.toArray<HTMLElement>('[data-scroll-x]').forEach((el) => {
+        const amount = Number(el.dataset.scrollX) || -20
+        gsap.fromTo(
+          el,
+          { xPercent: amount > 0 ? -amount : 0 },
+          {
+            xPercent: amount > 0 ? 0 : amount,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: el.parentElement ?? el,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 0.5,
+            },
+          },
+        )
+      })
+
+      if (!compact) {
+        gsap.utils.toArray<HTMLElement>('[data-speed]').forEach((el) => {
+          const amount = Number(el.dataset.speed) || 40
+          gsap.fromTo(
+            el,
+            { y: amount },
+            {
+              y: -amount,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: el.closest('section') ?? el,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 0.4,
+              },
+            },
+          )
+        })
+      }
+
+      const skewTargets = gsap.utils.toArray<HTMLElement>('[data-skew]')
+      const marqueeAnims = gsap.utils
+        .toArray<HTMLElement>('[data-marquee]')
+        .flatMap((el) => el.getAnimations())
+      if (skewTargets.length || marqueeAnims.length) {
+        const setSkew = skewTargets.length ? gsap.quickSetter(skewTargets, 'skewY', 'deg') : null
+        const clampSkew = gsap.utils.clamp(compact ? -3 : -5, compact ? 3 : 5)
+        const motion = { skew: 0, rate: 1 }
+        const apply = () => {
+          setSkew?.(motion.skew)
+          marqueeAnims.forEach((anim) => {
+            anim.playbackRate = motion.rate
+          })
+        }
+        gsap.set(skewTargets, { transformOrigin: 'center center', force3D: true })
+        ScrollTrigger.create({
+          onUpdate: (self) => {
+            const velocity = self.getVelocity()
+            const skew = clampSkew(velocity / -320)
+            const rate = (1 + Math.min(Math.abs(velocity) / 350, 5)) * (self.direction < 0 ? -1 : 1)
+            if (Math.abs(skew) > Math.abs(motion.skew) || Math.abs(rate) > Math.abs(motion.rate)) {
+              motion.skew = skew
+              motion.rate = rate
+              gsap.to(motion, {
+                skew: 0,
+                rate: self.direction < 0 ? -1 : 1,
+                duration: 0.9,
+                ease: 'power3.out',
+                overwrite: true,
+                onUpdate: apply,
+              })
+            }
+          },
+        })
+      }
 
       gsap.utils.toArray<HTMLElement>('[data-words]').forEach((el) => {
         gsap.fromTo(
@@ -179,13 +299,18 @@ export function useScrollEffects(key: string): void {
     })
 
     const refresh = () => ScrollTrigger.refresh()
-    const timer = window.setTimeout(refresh, 600)
+    const timer = window.setTimeout(refresh, 800)
     window.addEventListener('load', refresh)
 
     return () => {
       window.clearTimeout(timer)
       window.removeEventListener('load', refresh)
       ctx.revert()
+      document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) =>
+        el.getAnimations().forEach((anim) => {
+          anim.playbackRate = 1
+        }),
+      )
     }
   }, [key, reducedMotion])
 }

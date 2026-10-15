@@ -6,6 +6,7 @@ import { ProcessStrip } from '../components/home/ProcessStrip'
 import { RoomJourney } from '../components/home/RoomJourney'
 import { SignatureScroll } from '../components/home/SignatureScroll'
 import { Spaces } from '../components/home/Spaces'
+import { StatementBand } from '../components/home/StatementBand'
 import { StoryIntro } from '../components/home/StoryIntro'
 import { Testimonials } from '../components/home/Testimonials'
 import { ToursTeaser } from '../components/home/ToursTeaser'
@@ -17,6 +18,7 @@ export function Home() {
       <Hero />
       <StoryIntro />
       <RoomJourney />
+      <StatementBand />
       <Spaces />
       <SignatureScroll />
       <WhySiriz />

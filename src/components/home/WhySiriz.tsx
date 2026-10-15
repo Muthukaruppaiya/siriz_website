@@ -19,7 +19,7 @@ export function WhySiriz() {
         </div>
         <ol className={styles.list}>
           {whySiriz.map((item, i) => (
-            <li key={item.title} className={styles.item} data-reveal>
+            <li key={item.title} className={styles.item} data-focus>
               <span className={styles.num}>{String(i + 1).padStart(2, '0')}</span>
               <div>
                 <h3 className={styles.title}>{item.title}</h3>
