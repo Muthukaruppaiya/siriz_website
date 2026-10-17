@@ -18,6 +18,17 @@ export function scrollToY(y: number, immediate = false): void {
   }
 }
 
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+
+/** Eased scroll that starts and lands softly; used for snapping between scenes. */
+export function glideTo(y: number, duration = 0.9): void {
+  if (activeLenis) {
+    activeLenis.scrollTo(y, { duration, easing: easeInOutCubic, force: true })
+  } else {
+    window.scrollTo({ top: y, behavior: 'smooth' })
+  }
+}
+
 export function scrollToElement(el: HTMLElement): void {
   if (activeLenis) activeLenis.scrollTo(el, { offset: -72, duration: 1.15, force: true })
   else el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -48,11 +59,8 @@ export function useLenis(): void {
     if (reducedMotion) return
 
     const lenis = new Lenis({
-      lerp: 0.075,
-      wheelMultiplier: 0.85,
-      touchMultiplier: 1.15,
-      syncTouch: true,
-      syncTouchLerp: 0.075,
+      lerp: 0.08,
+      wheelMultiplier: 0.9,
       smoothWheel: true,
       anchors: { offset: -72 },
       autoRaf: false,

@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { contact, whatsappUrl } from '../../data/contact'
 import { frameUrl, roomJourney } from '../../data/rooms'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
-import { scrollToY } from '../../hooks/useLenis'
+import { glideTo } from '../../hooks/useLenis'
 import { SplitText } from '../motion/SplitText'
 import { Button } from '../shared/Button'
 import styles from './Hero.module.css'
@@ -15,6 +15,10 @@ gsap.registerPlugin(ScrollTrigger)
 const HOLD = 0.8
 /** Viewport heights of scroll per scene change. */
 const SCROLL_PER_SCENE = 1.15
+/** Progress within which a stop settles back on the current scene instead of advancing. */
+const DEAD_ZONE = 0.035
+/** Quiet time after the last scroll frame before settling onto a scene. */
+const SETTLE_MS = 140
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1)
@@ -31,7 +35,7 @@ function PinnedScenes() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const fillRefs = useRef<(HTMLSpanElement | null)[]>([])
   const triggerRef = useRef<ScrollTrigger | null>(null)
-  const timeRef = useRef<{ labels: number[]; duration: number }>({ labels: [], duration: 1 })
+  const pointsRef = useRef<number[]>([])
   const [active, setActive] = useState(0)
 
   useEffect(() => {
@@ -39,56 +43,68 @@ function PinnedScenes() {
     if (!root) return
     const count = roomJourney.length
     let current = 0
+    let settleTimer = 0
+    let direction = 1
 
     const ctx = gsap.context(() => {
       const layers = gsap.utils.toArray<HTMLElement>('[data-scene]')
+      const inners = layers.map((l) => l.querySelector('[data-inner]'))
       const medias = layers.map((l) => l.querySelector('[data-media]'))
       const dims = layers.map((l) => l.querySelector('[data-dim]'))
       const copies = gsap.utils.toArray<HTMLElement>('[data-copy]')
       const lines = copies.map((c) => c.querySelectorAll('[data-line]'))
 
       gsap.set(copies.slice(1), { autoAlpha: 0 })
+      gsap.set(medias, { force3D: true })
 
       const tl = gsap.timeline({ defaults: { ease: 'none' } })
       const labels = [0]
 
       for (let i = 1; i < count; i++) {
         const at = transitionAt(i)
-        tl.to(lines[i - 1], { y: -48, autoAlpha: 0, stagger: 0.04, duration: 0.4, ease: 'power2.in' }, at)
+        tl.to(lines[i - 1], { y: -56, autoAlpha: 0, stagger: 0.04, duration: 0.42, ease: 'power2.in' }, at)
           .set(copies[i - 1], { autoAlpha: 0 }, at + 0.45)
-          .fromTo(
-            layers[i],
-            { clipPath: 'inset(100% 0% 0% 0%)' },
-            { clipPath: 'inset(0% 0% 0% 0%)', duration: 1, ease: 'power2.inOut' },
-            at,
-          )
-          .fromTo(medias[i], { scale: 1.28, yPercent: 10 }, { scale: 1.02, yPercent: 0, duration: 1, ease: 'power2.out' }, at)
-          .to(medias[i - 1], { scale: 1.14, yPercent: -8, duration: 1, ease: 'power2.in' }, at)
-          .to(dims[i - 1], { opacity: 0.75, duration: 1 }, at)
+          .fromTo(layers[i], { yPercent: 100 }, { yPercent: 0, duration: 1, ease: 'power3.inOut' }, at)
+          .fromTo(inners[i], { yPercent: -75 }, { yPercent: 0, duration: 1, ease: 'power3.inOut' }, at)
+          .fromTo(medias[i], { scale: 1.2 }, { scale: 1.02, duration: 1.1, ease: 'power2.out' }, at)
+          .to(medias[i - 1], { scale: 1.1, yPercent: -12, duration: 1, ease: 'power2.in' }, at)
+          .to(dims[i - 1], { opacity: 0.85, duration: 1 }, at)
           .set(copies[i], { autoAlpha: 1 }, at + 0.45)
           .fromTo(
             lines[i],
-            { y: 64, autoAlpha: 0 },
-            { y: 0, autoAlpha: 1, stagger: 0.06, duration: 0.5, ease: 'power3.out' },
-            at + 0.5,
+            { y: 72, autoAlpha: 0 },
+            { y: 0, autoAlpha: 1, stagger: 0.06, duration: 0.55, ease: 'power3.out' },
+            at + 0.48,
           )
         labels.push(at + 1 + HOLD / 2)
       }
       tl.to({}, { duration: HOLD }, transitionAt(count - 1) + 1)
-      timeRef.current = { labels, duration: tl.duration() }
 
-      const snapPoints = [...labels.map((t) => t / tl.duration()), 1]
-      const nearest = gsap.utils.snap(snapPoints)
-      const snapTo = (value: number, self?: ScrollTrigger) => {
-        const closest = nearest(value)
-        if (Math.abs(value - closest) < 0.035) return closest
-        const forward = (self?.direction ?? 1) > 0
-        return forward
-          ? (snapPoints.find((p) => p > value) ?? 1)
-          : ([...snapPoints].reverse().find((p) => p < value) ?? 0)
+      const points = [...labels.map((t) => t / tl.duration()), 1]
+      pointsRef.current = points
+      const nearest = gsap.utils.snap(points)
+
+      const settle = () => {
+        const st = triggerRef.current
+        if (!st) return
+        const y = window.scrollY
+        if (y <= st.start + 1 || y >= st.end - 1) return
+        const progress = (y - st.start) / (st.end - st.start)
+        const closest = nearest(progress)
+        const target =
+          Math.abs(progress - closest) < DEAD_ZONE
+            ? closest
+            : direction > 0
+              ? (points.find((p) => p > progress) ?? 1)
+              : ([...points].reverse().find((p) => p < progress) ?? 0)
+        const targetY = st.start + target * (st.end - st.start)
+        const distance = Math.abs(targetY - y)
+        if (distance < 2) return
+        glideTo(targetY, gsap.utils.clamp(0.5, 1.1, (distance / window.innerHeight) * 1.1))
       }
 
       const update = (self: ScrollTrigger) => {
+        if (self.direction) direction = self.direction
         const t = self.progress * tl.duration()
         let next = 0
         for (let i = 1; i < count; i++) if (t >= transitionAt(i) + 0.5) next = i
@@ -102,6 +118,8 @@ function PinnedScenes() {
           const to = i === count - 1 ? tl.duration() : transitionAt(i + 1) + 0.5
           el.style.transform = `scaleX(${clamp01((t - from) / (to - from))})`
         })
+        window.clearTimeout(settleTimer)
+        settleTimer = window.setTimeout(settle, SETTLE_MS)
       }
 
       triggerRef.current = ScrollTrigger.create({
@@ -110,17 +128,10 @@ function PinnedScenes() {
         start: 'top top',
         end: () => `+=${window.innerHeight * (count - 1) * SCROLL_PER_SCENE}`,
         pin: true,
-        scrub: 0.9,
+        scrub: 0.35,
         anticipatePin: 1,
         invalidateOnRefresh: true,
         refreshPriority: 3,
-        snap: {
-          snapTo,
-          inertia: false,
-          duration: { min: 0.35, max: 0.9 },
-          delay: 0.12,
-          ease: 'power2.inOut',
-        },
         onUpdate: update,
       })
     }, root)
@@ -140,6 +151,7 @@ function PinnedScenes() {
     else first?.addEventListener('canplay', preloadRest, { once: true })
 
     return () => {
+      window.clearTimeout(settleTimer)
       first?.removeEventListener('canplay', preloadRest)
       ctx.revert()
       triggerRef.current = null
@@ -161,27 +173,32 @@ function PinnedScenes() {
   const goTo = (i: number) => {
     const st = triggerRef.current
     if (!st) return
-    const { labels, duration } = timeRef.current
-    scrollToY(st.start + (st.end - st.start) * (labels[i] / duration))
+    const points = pointsRef.current
+    const y = i >= points.length - 1 ? st.end + 2 : st.start + (st.end - st.start) * points[i]
+    glideTo(y, 1.1)
   }
+
+  const last = active === roomJourney.length - 1
 
   return (
     <section className={styles.hero} ref={rootRef} aria-label="Siriz Interiors rooms">
       {roomJourney.map((room, i) => (
         <div key={room.id} className={styles.scene} data-scene aria-hidden={i !== active}>
-          <div className={styles.media} data-media>
-            <video
-              ref={(el) => {
-                videoRefs.current[i] = el
-              }}
-              className={styles.video}
-              src={room.videoSrc}
-              poster={frameUrl(room, 0)}
-              autoPlay={i === 0}
-              muted
-              playsInline
-              preload={i === 0 ? 'auto' : 'metadata'}
-            />
+          <div className={styles.inner} data-inner>
+            <div className={styles.media} data-media>
+              <video
+                ref={(el) => {
+                  videoRefs.current[i] = el
+                }}
+                className={styles.video}
+                src={room.videoSrc}
+                poster={frameUrl(room, 0)}
+                autoPlay={i === 0}
+                muted
+                playsInline
+                preload={i === 0 ? 'auto' : 'metadata'}
+              />
+            </div>
           </div>
           <div className={styles.dim} data-dim />
         </div>
@@ -221,10 +238,12 @@ function PinnedScenes() {
             </button>
           ))}
         </nav>
-        <div className={styles.scroll} aria-hidden="true">
-          <span>Scroll</span>
-          <span className={styles.scrollLine} />
-        </div>
+        <button type="button" className={styles.next} onClick={() => goTo(active + 1)}>
+          <span className={styles.nextLabel} key={active}>
+            {last ? 'Continue' : `Next · ${roomJourney[active + 1].name}`}
+          </span>
+          <span className={styles.scrollLine} aria-hidden="true" />
+        </button>
       </div>
     </section>
   )
@@ -233,9 +252,16 @@ function PinnedScenes() {
 function SceneCopy({ index }: { index: number }) {
   const room = roomJourney[index]
 
+  const bigIndex = (
+    <div data-line className={styles.bigIndex} aria-hidden="true">
+      {pad(index + 1)}
+    </div>
+  )
+
   if (index === 0) {
     return (
       <>
+        {bigIndex}
         <div data-line>
           <p className={styles.kicker} data-reveal="fade">
             <span className={styles.dot} aria-hidden="true" />
@@ -271,6 +297,7 @@ function SceneCopy({ index }: { index: number }) {
 
   return (
     <>
+      {bigIndex}
       <div data-line>
         <p className={styles.kicker}>
           <span className={styles.dot} aria-hidden="true" />
