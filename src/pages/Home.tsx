@@ -3,7 +3,6 @@ import { Hero } from '../components/home/Hero'
 import { PackagesTeaser } from '../components/home/PackagesTeaser'
 import { Partners } from '../components/home/Partners'
 import { ProcessStrip } from '../components/home/ProcessStrip'
-import { RoomJourney } from '../components/home/RoomJourney'
 import { SignatureScroll } from '../components/home/SignatureScroll'
 import { Spaces } from '../components/home/Spaces'
 import { StatementBand } from '../components/home/StatementBand'
@@ -17,7 +16,6 @@ export function Home() {
     <>
       <Hero />
       <StoryIntro />
-      <RoomJourney />
       <StatementBand />
       <Spaces />
       <SignatureScroll />

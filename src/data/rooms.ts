@@ -16,13 +16,6 @@ export function frameUrl(room: RoomJourneyItem, index: number): string {
   return `${room.framesPath}/${String(index + 1).padStart(4, '0')}.webp`
 }
 
-export const buildStages = [
-  { at: 0, label: 'Bare shell' },
-  { at: 0.1, label: 'Design & planning' },
-  { at: 0.45, label: 'Installation' },
-  { at: 0.85, label: 'Handover' },
-] as const
-
 export const roomJourney: RoomJourneyItem[] = [
   {
     id: 'living',
