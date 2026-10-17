@@ -32,7 +32,7 @@ export function Packages() {
         <div className={`${styles.wrap} ${styles.pkgRows}`}>
           {packages.map((pkg, i) => (
             <article key={pkg.id} className={styles.pkgRow}>
-              <figure className={styles.pkgMedia} data-reveal-clip data-skew>
+              <figure className={styles.pkgMedia} data-reveal-clip>
                 <img src={pkg.image} alt={`${pkg.name} by Siriz Interiors`} loading="lazy" />
               </figure>
               <div className={styles.pkgMeta}>

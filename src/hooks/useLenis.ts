@@ -20,12 +20,19 @@ export function scrollToY(y: number, immediate = false): void {
 
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
 
-/** Eased scroll that starts and lands softly; used for snapping between scenes. */
-export function glideTo(y: number, duration = 0.9): void {
+type GlideOptions = {
+  /** Ignore wheel and touch input until the glide lands. */
+  lock?: boolean
+  onComplete?: () => void
+}
+
+/** Eased scroll that starts and lands softly; used for moving between scenes. */
+export function glideTo(y: number, duration = 0.9, { lock = false, onComplete }: GlideOptions = {}): void {
   if (activeLenis) {
-    activeLenis.scrollTo(y, { duration, easing: easeInOutCubic, force: true })
+    activeLenis.scrollTo(y, { duration, easing: easeInOutCubic, force: true, lock, onComplete: () => onComplete?.() })
   } else {
     window.scrollTo({ top: y, behavior: 'smooth' })
+    if (onComplete) window.setTimeout(onComplete, duration * 1000)
   }
 }
 

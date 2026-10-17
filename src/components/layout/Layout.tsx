@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { scrollToElement, scrollToY, useLenis } from '../../hooks/useLenis'
 import { useScrollEffects } from '../../hooks/useScrollEffects'
+import { useStackedSections } from '../../hooks/useStackedSections'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { WhatsAppFloat } from './WhatsAppFloat'
@@ -11,6 +12,7 @@ export function Layout() {
   useLenis()
   const { pathname, hash } = useLocation()
   useScrollEffects(pathname)
+  useStackedSections(pathname)
 
   useEffect(() => {
     if (hash) {

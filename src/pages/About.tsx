@@ -52,7 +52,7 @@ export function About() {
 
       <section className={`${styles.section} ${styles.light}`}>
         <div className={`${styles.wrap} ${styles.office}`}>
-          <figure className={styles.officeMedia} data-reveal-clip data-skew>
+          <figure className={styles.officeMedia} data-reveal-clip>
             <img src={asset('/images/about/about.webp')} alt="Siriz Interiors studio interior" loading="lazy" />
           </figure>
           <div className={styles.officeMeta}>

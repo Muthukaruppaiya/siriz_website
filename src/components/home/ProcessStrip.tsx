@@ -4,7 +4,7 @@ import styles from './ProcessStrip.module.css'
 
 export function ProcessStrip() {
   return (
-    <section className={styles.section} data-curtain>
+    <section className={styles.section}>
       <div className={styles.inner}>
         <SectionHeading
           tone="dark"

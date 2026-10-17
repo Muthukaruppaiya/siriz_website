@@ -6,7 +6,7 @@ import styles from './FinalCTA.module.css'
 
 export function FinalCTA() {
   return (
-    <section className={styles.section} id="consult" data-curtain>
+    <section className={styles.section} id="consult">
       <div className={styles.bg} aria-hidden="true">
         <img src={asset('/images/signature/signature-03.webp')} alt="" data-parallax="10" />
       </div>

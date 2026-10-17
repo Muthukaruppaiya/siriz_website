@@ -15,7 +15,6 @@ gsap.registerPlugin(ScrollTrigger)
  *   data-parallax="12"     drifts by ±N% while its parent crosses the viewport
  *   data-fade-out          fades and lifts away as it scrolls off the top
  *   data-draw              scaleY 0 → 1 while its parent scrolls (timeline lines)
- *   data-curtain           section opens from an inset rounded card to full bleed as it enters
  *   data-skew              leans with scroll velocity, settles when scrolling stops
  *   data-speed="60"        drifts ±N px against the scroll (desktop only)
  *   data-focus             brightens and settles as it reaches the middle of the viewport
@@ -116,40 +115,19 @@ export function useScrollEffects(key: string): void {
         })
       })
 
-      gsap.utils.toArray<HTMLElement>('[data-curtain]').forEach((el) => {
-        gsap.fromTo(
-          el,
-          {
-            clipPath: compact
-              ? 'inset(2.5% 3% 0% 3% round 18px)'
-              : 'inset(7% 6% 0% 6% round 36px)',
-          },
-          {
-            clipPath: 'inset(0% 0% 0% 0% round 0px)',
-            ease: 'none',
-            scrollTrigger: {
-              trigger: el,
-              start: 'top bottom',
-              end: 'top 20%',
-              scrub: 0.6,
-            },
-          },
-        )
-      })
-
       gsap.utils.toArray<HTMLElement>('[data-focus]').forEach((el) => {
         gsap.fromTo(
           el,
-          { opacity: 0.18, x: compact ? 0 : 48 },
+          { opacity: 0.35, x: compact ? 0 : 24 },
           {
             opacity: 1,
             x: 0,
             ease: 'none',
             scrollTrigger: {
               trigger: el,
-              start: 'top 92%',
-              end: 'top 58%',
-              scrub: 0.5,
+              start: 'top 95%',
+              end: 'top 72%',
+              scrub: 0.4,
             },
           },
         )
@@ -199,7 +177,7 @@ export function useScrollEffects(key: string): void {
         .flatMap((el) => el.getAnimations())
       if (skewTargets.length || marqueeAnims.length) {
         const setSkew = skewTargets.length ? gsap.quickSetter(skewTargets, 'skewY', 'deg') : null
-        const clampSkew = gsap.utils.clamp(compact ? -3 : -5, compact ? 3 : 5)
+        const clampSkew = gsap.utils.clamp(compact ? -1.5 : -3, compact ? 1.5 : 3)
         const motion = { skew: 0, rate: 1 }
         const apply = () => {
           setSkew?.(motion.skew)
@@ -302,7 +280,20 @@ export function useScrollEffects(key: string): void {
     const timer = window.setTimeout(refresh, 800)
     window.addEventListener('load', refresh)
 
+    let lastHeight = document.body.scrollHeight
+    let resizeTimer = 0
+    const heightWatcher = new ResizeObserver(() => {
+      const height = document.body.scrollHeight
+      if (Math.abs(height - lastHeight) < 2) return
+      lastHeight = height
+      window.clearTimeout(resizeTimer)
+      resizeTimer = window.setTimeout(refresh, 200)
+    })
+    heightWatcher.observe(document.body)
+
     return () => {
+      heightWatcher.disconnect()
+      window.clearTimeout(resizeTimer)
       window.clearTimeout(timer)
       window.removeEventListener('load', refresh)
       ctx.revert()

@@ -70,7 +70,11 @@ export function SignatureScroll() {
   }, [pinned])
 
   return (
-    <section className={`${styles.section} ${pinned ? styles.pinned : ''}`} ref={sectionRef}>
+    <section
+      className={`${styles.section} ${pinned ? styles.pinned : ''}`}
+      ref={sectionRef}
+      data-pinned={pinned ? '' : undefined}
+    >
       <div className={styles.head}>
         <SectionHeading
           eyebrow="Siriz Signature"

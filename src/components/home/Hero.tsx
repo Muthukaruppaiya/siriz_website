@@ -15,10 +15,18 @@ gsap.registerPlugin(ScrollTrigger)
 const HOLD = 0.8
 /** Viewport heights of scroll per scene change. */
 const SCROLL_PER_SCENE = 1.15
-/** Progress within which a stop settles back on the current scene instead of advancing. */
-const DEAD_ZONE = 0.035
-/** Quiet time after the last scroll frame before settling onto a scene. */
-const SETTLE_MS = 140
+/** Seconds for the glide from one scene to the next. */
+const GLIDE = 1
+/** A pause this long between wheel events starts a new gesture; anything shorter is the same flick. */
+const GESTURE_GAP_MS = 220
+/** After a glide lands, weak trailing momentum from the same flick is ignored for this long. */
+const COOLDOWN_MS = 450
+/** Wheel deltas below this are the fading tail of trackpad momentum, never a fresh scroll. */
+const MOMENTUM_DELTA = 8
+/** Finger travel before a swipe counts as a scene change. */
+const SWIPE_PX = 36
+/** Quiet time after the last scroll frame before settling onto a scene (scrollbar drags, etc.). */
+const SETTLE_MS = 160
 
 const pad = (n: number) => String(n).padStart(2, '0')
 const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1)
@@ -35,7 +43,7 @@ function PinnedScenes() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([])
   const fillRefs = useRef<(HTMLSpanElement | null)[]>([])
   const triggerRef = useRef<ScrollTrigger | null>(null)
-  const pointsRef = useRef<number[]>([])
+  const goToRef = useRef<(i: number) => void>(() => undefined)
   const [active, setActive] = useState(0)
 
   useEffect(() => {
@@ -45,6 +53,10 @@ function PinnedScenes() {
     let current = 0
     let settleTimer = 0
     let direction = 1
+    let gliding = false
+    let glideFallback = 0
+    let cooldownUntil = 0
+    let scenePoints: number[] = []
 
     const ctx = gsap.context(() => {
       const layers = gsap.utils.toArray<HTMLElement>('[data-scene]')
@@ -80,27 +92,20 @@ function PinnedScenes() {
       }
       tl.to({}, { duration: HOLD }, transitionAt(count - 1) + 1)
 
-      const points = [...labels.map((t) => t / tl.duration()), 1]
-      pointsRef.current = points
-      const nearest = gsap.utils.snap(points)
+      scenePoints = labels.map((t) => t / tl.duration())
 
       const settle = () => {
         const st = triggerRef.current
-        if (!st) return
+        if (!st || gliding) return
         const y = window.scrollY
         if (y <= st.start + 1 || y >= st.end - 1) return
-        const progress = (y - st.start) / (st.end - st.start)
-        const closest = nearest(progress)
+        const ys = scenePoints.map((p) => st.start + p * (st.end - st.start))
         const target =
-          Math.abs(progress - closest) < DEAD_ZONE
-            ? closest
-            : direction > 0
-              ? (points.find((p) => p > progress) ?? 1)
-              : ([...points].reverse().find((p) => p < progress) ?? 0)
-        const targetY = st.start + target * (st.end - st.start)
-        const distance = Math.abs(targetY - y)
-        if (distance < 2) return
-        glideTo(targetY, gsap.utils.clamp(0.5, 1.1, (distance / window.innerHeight) * 1.1))
+          direction > 0
+            ? (ys.find((v) => v >= y - 2) ?? st.end)
+            : ([...ys].reverse().find((v) => v <= y + 2) ?? st.start)
+        if (Math.abs(target - y) < 2) return
+        glideTo(target, 0.7)
       }
 
       const update = (self: ScrollTrigger) => {
@@ -139,6 +144,122 @@ function PinnedScenes() {
     ScrollTrigger.sort()
     ScrollTrigger.refresh()
 
+    const glide = (y: number) => {
+      gliding = true
+      window.clearTimeout(settleTimer)
+      window.clearTimeout(glideFallback)
+      const done = () => {
+        if (!gliding) return
+        gliding = false
+        cooldownUntil = performance.now() + COOLDOWN_MS
+        window.clearTimeout(glideFallback)
+      }
+      glideFallback = window.setTimeout(done, GLIDE * 1000 + 400)
+      glideTo(y, GLIDE, { lock: true, onComplete: done })
+    }
+
+    /** The pinned stage, plus the screen just below it so one scroll up returns to the last scene. */
+    const inRange = () => {
+      const st = triggerRef.current
+      return !!st && window.scrollY >= st.start - 1 && window.scrollY <= st.end + root.offsetHeight + 1
+    }
+
+    /**
+     * Where one step in `dir` lands: the next scene, or past the stage from the last one.
+     * Null when the step has nowhere to go, so the page scrolls normally instead.
+     */
+    const stepTarget = (dir: number): number | null => {
+      const st = triggerRef.current
+      if (!st || !inRange()) return null
+      const y = window.scrollY
+      const ys = scenePoints.map((p) => st.start + p * (st.end - st.start))
+      const target =
+        dir > 0
+          ? (ys.find((v) => v > y + 4) ?? st.end + root.offsetHeight)
+          : [...ys].reverse().find((v) => v < y - 4)
+      return target !== undefined && Math.abs(target - y) > 4 ? target : null
+    }
+
+    const step = (dir: number): boolean => {
+      if (gliding) return false
+      const target = stepTarget(dir)
+      if (target === null) return false
+      glide(target)
+      return true
+    }
+
+    goToRef.current = (i: number) => {
+      const st = triggerRef.current
+      if (!st || gliding) return
+      glide(i < count ? st.start + scenePoints[i] * (st.end - st.start) : st.end + root.offsetHeight)
+    }
+
+    let lastWheel = 0
+    let wheelConsumed = false
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || Math.abs(e.deltaY) < Math.abs(e.deltaX)) return
+      const now = performance.now()
+      const paused = now - lastWheel > GESTURE_GAP_MS
+      lastWheel = now
+      const strong = Math.abs(e.deltaY) >= MOMENTUM_DELTA
+      if (paused && (strong || now >= cooldownUntil)) wheelConsumed = false
+      if (!inRange() && !gliding) return
+      if (gliding || wheelConsumed) {
+        e.preventDefault()
+        e.stopPropagation()
+        return
+      }
+      if (!strong && now < cooldownUntil) {
+        e.preventDefault()
+        return
+      }
+      if (Math.abs(e.deltaY) < 2) return
+      if (step(Math.sign(e.deltaY))) {
+        wheelConsumed = true
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+
+    let touchY = 0
+    let touchOwned: boolean | null = null
+    let touchStepped = false
+    const onTouchStart = (e: TouchEvent) => {
+      touchY = e.touches[0].clientY
+      touchOwned = null
+      touchStepped = false
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length > 1) return
+      const dy = touchY - e.touches[0].clientY
+      if (touchOwned === null) {
+        if (Math.abs(dy) < 4) return
+        touchOwned = gliding || stepTarget(Math.sign(dy)) !== null
+      }
+      if (!touchOwned) return
+      if (e.cancelable) e.preventDefault()
+      if (!touchStepped && Math.abs(dy) > SWIPE_PX) touchStepped = step(Math.sign(dy))
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.altKey || e.ctrlKey || e.metaKey) return
+      const target = e.target as HTMLElement | null
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return
+      const keys: Record<string, number> = { ArrowDown: 1, PageDown: 1, ArrowUp: -1, PageUp: -1, ' ': e.shiftKey ? -1 : 1 }
+      const dir = keys[e.key]
+      if (!dir || (e.key === ' ' && target?.closest('button, a'))) return
+      if (gliding && inRange()) {
+        e.preventDefault()
+        return
+      }
+      if (step(dir)) e.preventDefault()
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false, capture: true })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('keydown', onKey)
+
     const [first, ...rest] = videoRefs.current
     const preloadRest = () =>
       rest.forEach((video) => {
@@ -151,7 +272,12 @@ function PinnedScenes() {
     else first?.addEventListener('canplay', preloadRest, { once: true })
 
     return () => {
+      window.removeEventListener('wheel', onWheel, { capture: true })
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('keydown', onKey)
       window.clearTimeout(settleTimer)
+      window.clearTimeout(glideFallback)
       first?.removeEventListener('canplay', preloadRest)
       ctx.revert()
       triggerRef.current = null
@@ -170,18 +296,12 @@ function PinnedScenes() {
     })
   }, [active])
 
-  const goTo = (i: number) => {
-    const st = triggerRef.current
-    if (!st) return
-    const points = pointsRef.current
-    const y = i >= points.length - 1 ? st.end + 2 : st.start + (st.end - st.start) * points[i]
-    glideTo(y, 1.1)
-  }
+  const goTo = (i: number) => goToRef.current(i)
 
   const last = active === roomJourney.length - 1
 
   return (
-    <section className={styles.hero} ref={rootRef} aria-label="Siriz Interiors rooms">
+    <section className={styles.hero} ref={rootRef} aria-label="Siriz Interiors rooms" data-pinned>
       {roomJourney.map((room, i) => (
         <div key={room.id} className={styles.scene} data-scene aria-hidden={i !== active}>
           <div className={styles.inner} data-inner>

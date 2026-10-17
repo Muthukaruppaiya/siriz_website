@@ -5,7 +5,7 @@ import styles from './Spaces.module.css'
 
 export function Spaces() {
   return (
-    <section className={styles.section} data-curtain>
+    <section className={styles.section}>
       <div className={styles.inner}>
         <div className={styles.head}>
           <SectionHeading
